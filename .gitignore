@@ -14,7 +14,9 @@
 ## User settings
 xcuserdata/
 
+*/Preview Content/Preview Assets.xcassets/Contents.json 
 */Assets.xcassets/*/Contents.json
+*/Assets.xcassets/Contents.json 
 
 ## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
 *.xcscmblueprint
