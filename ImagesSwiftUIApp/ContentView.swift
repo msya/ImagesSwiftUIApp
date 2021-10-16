@@ -18,7 +18,13 @@ struct ContentView: View {
     @State var gridLayout: [GridItem] = [ GridItem() ]
     
     var body: some View {
+        
+        let _ = print("Body Eval")
+        
         NavigationView {
+            
+            let _ = print("Nav View Eval")
+            
             ZStack {
                 if (showProgressBar) {
                     ProgressView()
@@ -31,12 +37,11 @@ struct ContentView: View {
                 
                 ScrollView {
                     LazyVGrid(columns: gridLayout, alignment: .center, spacing: 10) {
-                        ForEach(searchResults, id: \.self) { item in
+                        ForEach(searchResults, id: \.id) { item in
                             NavigationLink(destination: ImageDetailsView(
                                 repository: repository,
-                                isLiked: item.isLiked,
                                 imageData: item
-                            )) {
+                            ).id(item.id)) {
                                 Image(item.url)
                                     .renderingMode(.original)
                                     .resizable()
@@ -48,7 +53,8 @@ struct ContentView: View {
                             }
                         }
                     }.padding(.horizontal)
-                    .navigationTitle("Images")
+                        .navigationTitle("Images")
+                        .navigationBarTitleDisplayMode(.inline)
                      .searchable(text: $searchText)
                 }
                 .toolbar {
@@ -66,10 +72,10 @@ struct ContentView: View {
                         }
                     }
                 }
-            }.task {
-                await repository.getImages()
-                showProgressBar = false
             }
+        }.task {
+            await repository.getImages()
+            showProgressBar = false
         }
     }
     

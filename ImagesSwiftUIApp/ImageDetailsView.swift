@@ -11,9 +11,11 @@ struct ImageDetailsView: View {
     
     @ObservedObject var repository: ImagesRepository
     
-    @State var isLiked: Bool
+    @State var isLiked: Bool = false
     
-    var imageData: ImageData
+    @State var likeTask: Task<Void, Never>? = nil
+    
+    let imageData: ImageData
     
     var body: some View {
         ScrollView {
@@ -54,14 +56,27 @@ struct ImageDetailsView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    isLiked = true
-                    Task {
-                        await repository.likeImage(id: imageData.id)
-                    }
+                    isLiked.toggle()
                 }) {
                     Image(systemName:  isLiked ? "heart.fill" : "heart")
                         .font(.title)
                         .foregroundColor(.red)
+                }
+            }
+        }
+        .onAppear {
+            isLiked = imageData.isLiked
+        }
+        .onDisappear {
+            likeTask?.cancel()
+        }
+        .onChange(of: imageData.isLiked) { newValue in
+            isLiked = newValue
+        }.onChange(of: isLiked) { newValue in
+            if (newValue) {
+                likeTask?.cancel()
+                likeTask = Task {
+                    await repository.likeImage(id: imageData.id)
                 }
             }
         }
@@ -73,7 +88,6 @@ struct ImageDetailsView_Previews: PreviewProvider {
         NavigationView {
             ImageDetailsView(
                 repository: ImagesRepository(),
-                isLiked: true,
                 imageData: ImageData(
                     location: "Trinity, Ireland",
                     tags: [

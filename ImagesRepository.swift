@@ -10,7 +10,7 @@ import Foundation
 @MainActor
 class ImagesRepository: ObservableObject {
     
-    @Published var images = [ImageData]()
+    @Published var images: [ImageData] = []
 
     func getImages() async {
         await Task.sleep(3 * 1_000_000_000)
@@ -354,31 +354,37 @@ class ImagesRepository: ObservableObject {
     }
     
     func likeImage(id: UUID) async {
-        
-        print("LIKE IMAGE")
-        
         await Task.sleep(2 * 1_000_000_000)
         
-        var imageData = images.first {
-            $0.id == id
+        guard !Task.isCancelled else {
+            return
         }
         
-        print(imageData?.isLiked)
-        
-        if (imageData != nil) {
-            print("IMAGE LIKED")
+        let imageData = images.first {
+            $0.id == id
+        }
+
+        if let imageData = imageData {
             objectWillChange.send()
-            imageData!.isLiked = !imageData!.isLiked
-            print(imageData!.isLiked)
+            imageData.isLiked.toggle()
         }
     }
     
 }
 
-struct ImageData : Hashable, Identifiable {
+class ImageData {
+    
     let id = UUID()
     let location: String?
     let tags: [String]
     let url: String
     var isLiked: Bool
+    
+    init(location: String?, tags: [String], url: String, isLiked: Bool) {
+        self.location = location
+        self.tags = tags
+        self.url = url
+        self.isLiked = isLiked
+    }
+    
 }
